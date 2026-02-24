@@ -6,6 +6,7 @@ TagManager:
   tags:
   - FuelLauncher
   - ScoreZone
+  - Fuel
   layers:
   - Default
   - TransparentFX
