@@ -25,11 +25,12 @@ public class DCMotor : MonoBehaviour
 
     [Header("References")]
     [SerializeField] public Rigidbody outputBody;   // The driven rigidbody
-    [SerializeField] public Vector3 motorAxis = Vector3.left;
+    [SerializeField] public Vector3 motorAxis = Vector3.forward;
 
     // Internal state
     private float current = 0f;
     private float motorSpeed = 0f;  // rad/s
+
 
     void FixedUpdate()
     {
@@ -47,18 +48,19 @@ public class DCMotor : MonoBehaviour
         float backEMF = k_e * motorSpeed;
 
         float dI = (appliedVoltage - R * current - backEMF) / L;
+        Debug.Log(current);
         current += dI * dt;
-
         // Current limiting
-        current = Mathf.Clamp(current, -I_max, I_max);
+        //current = Mathf.Clamp(current, -I_max, I_max);
+
+        
 
         // 3️⃣ Motor torque at shaft
         float motorTorque = k_t * current;
 
         // 4️⃣ Friction losses
         float viscous = viscousFriction * motorSpeed;
-        float coulomb = coulombFriction * Mathf.Sign(motorSpeed);
-
+        float coulomb = coulombFriction * deadZoneSign(0.01f, motorSpeed);
         float netMotorTorque = motorTorque - viscous - coulomb;
 
         // 5️⃣ Convert to output torque through gearbox
@@ -67,9 +69,34 @@ public class DCMotor : MonoBehaviour
         // 6️⃣ Apply torque to rigidbody
         Vector3 worldAxis = transform.TransformDirection(motorAxis.normalized);
         outputBody.AddTorque(worldAxis * outputTorque, ForceMode.Force);
+        
     }
 
     // Optional getters for telemetry
     public float GetCurrent() => current;
     public float GetMotorSpeed() => motorSpeed;
+
+    private float deadZoneSign(float deadZone, float output)
+    {
+        if (Mathf.Abs(output) > deadZone)
+        {
+            return Mathf.Sign(output);
+        }
+        else
+        {
+            return 0.0f;
+        }
+    }
+
+    private float deadzone(float deadZone, float output)
+    {
+        if (Mathf.Abs(output) > deadZone)
+        {
+            return output;
+        }
+        else
+        {
+            return 0.0f;
+        }
+    }
 }
