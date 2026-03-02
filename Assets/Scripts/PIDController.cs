@@ -1,59 +1,52 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 
-public class PIDController : MonoBehaviour
+[System.Serializable]
+public class PIDController
 {
-    float kP = 0;
-    float kI = 0;
-    float kD = 0;
+    public float Kp;
+    public float Ki;
+    public float Kd;
 
-    float targetPoint = 0;
-    float currentPoint = 0;
-    float lastPoint = 0;
-    float totalError = 0;
-    float derivativeError = 0;
-    public delegate float CurrentPoint();
-    CurrentPoint currentPointDelegate; 
+    public float outputMin = -1f;
+    public float outputMax = 1f;
+    public float integralMin = -1f;
+    public float integralMax = 1f;
 
-    public PIDController(float kP, float kI, float kD, CurrentPoint currentPointDelegate)
+    private float integral;
+    private float previousMeasurement;
+    private bool initialized;
+
+
+    public void Reset()
     {
-        this.kP = kP;
-        this.kI = kI;
-        this.kD = kD;
-        this.currentPointDelegate = currentPointDelegate;
+        integral = 0f;
+        previousMeasurement = 0f;
+        initialized = false;
     }
 
-    public void setTarget(float targetPoint)
+    public float Update(float setpoint, float measurement, float dt)
     {
-        this.targetPoint = targetPoint;
-        totalError = 0;
-    }
+        float error = setpoint - measurement;
 
-    public void setkP(float kP)
-    {
-        this.kP = kP;
-    }
+        float P = Kp * error;
 
-    public void setkI(float kI)
-    {
-        this.kI = kI;
-    }
+        // Integral
+        integral += Ki * error * dt;
+        integral = Mathf.Clamp(integral, integralMin, integralMax);
 
-    public void setkD(float kD)
-    {
-        this.kD = kD;
-    }
-    public float calculate()
-    {
-        return (targetPoint-currentPoint)*kP + totalError*kI + derivativeError*kD;
-    }
+        // Derivative on measurement
+        float derivative = 0f;
+        if (initialized)
+        {
+            derivative = (measurement - previousMeasurement) / dt;
+        }
 
-    private void FixedUpdate()
-    {
+        float D = -Kd * derivative;
 
-        currentPoint = currentPointDelegate();
-        totalError += currentPoint * Time.fixedDeltaTime;
-        derivativeError = (currentPoint - lastPoint) / Time.fixedDeltaTime;
-        lastPoint = currentPoint;
+        previousMeasurement = measurement;
+        initialized = true;
+
+        float output = P + integral + D;
+        return Mathf.Clamp(output, outputMin, outputMax);
     }
 }

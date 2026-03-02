@@ -31,6 +31,9 @@ public class DCMotor : MonoBehaviour
     private float current = 0f;
     private float motorSpeed = 0f;  // rad/s
 
+    private Encoder encoder = new Encoder();
+    private float motorAngle = 0f;
+
 
     void FixedUpdate()
     {
@@ -47,13 +50,16 @@ public class DCMotor : MonoBehaviour
         float appliedVoltage = dutyCycle * batteryVoltage;
         float backEMF = k_e * motorSpeed;
 
-        float dI = (appliedVoltage - R * current - backEMF) / L;
-        Debug.Log(current);
-        current += dI * dt;
-        // Current limiting
+        // Electrical steady-state current
+        float I_inf = (appliedVoltage - backEMF) / R;
+
+        // Exact exponential update
+        float tau_e = L / R;
+        current = I_inf + (current - I_inf) * Mathf.Exp(-dt / tau_e);
+        // Current limit
         //current = Mathf.Clamp(current, -I_max, I_max);
 
-        
+
 
         // 3️⃣ Motor torque at shaft
         float motorTorque = k_t * current;
@@ -61,7 +67,7 @@ public class DCMotor : MonoBehaviour
         // 4️⃣ Friction losses
         float viscous = viscousFriction * motorSpeed;
         float coulomb = coulombFriction * deadZoneSign(0.01f, motorSpeed);
-        float netMotorTorque = motorTorque - viscous - coulomb;
+        float netMotorTorque = deadzone(coulomb,motorTorque - viscous- coulomb);
 
         // 5️⃣ Convert to output torque through gearbox
         float outputTorque = netMotorTorque * gearRatio;
@@ -69,12 +75,24 @@ public class DCMotor : MonoBehaviour
         // 6️⃣ Apply torque to rigidbody
         Vector3 worldAxis = transform.TransformDirection(motorAxis.normalized);
         outputBody.AddTorque(worldAxis * outputTorque, ForceMode.Force);
-        
+
+        // Integrate motor angle
+        motorAngle += motorSpeed * dt;
+
+        // Output angle after gearbox
+        float outputAngle = motorAngle / gearRatio;
+
+        encoder.Update(motorAngle, outputAngle, dt);
+
     }
 
     // Optional getters for telemetry
     public float GetCurrent() => current;
     public float GetMotorSpeed() => motorSpeed;
+    public float getMotorAngle() => encoder.GetAngleRadians();
+
+    public Encoder getEncoder() => encoder;
+
 
     private float deadZoneSign(float deadZone, float output)
     {
