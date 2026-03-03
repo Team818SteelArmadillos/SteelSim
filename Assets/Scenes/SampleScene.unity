@@ -253,8 +253,8 @@ Transform:
   m_GameObject: {fileID: 85914347}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.01999998, z: -1.2404604}
-  m_LocalScale: {x: 0.2, y: 0.2, z: 2}
+  m_LocalPosition: {x: 0, y: 0.1467, z: -1.1932}
+  m_LocalScale: {x: 0.2, y: 0.5334, z: 1.9054}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 396327907}
@@ -522,6 +522,7 @@ GameObject:
   - component: {fileID: 396327903}
   - component: {fileID: 396327902}
   - component: {fileID: 396327908}
+  - component: {fileID: 396327909}
   m_Layer: 0
   m_Name: Cube (2)
   m_TagString: Untagged
@@ -667,19 +668,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MotorController
   motor: {fileID: 396327902}
-  encoder:
-    countsPerRevolution: 2048
-    mountedOnMotorShaft: 1
-    gearRatio: 10
-    positionNoiseStdDev: 0
-    velocityNoiseStdDev: 0
-    measurementDelay: 0
-  mode: 2
+  encoder: {fileID: 396327909}
+  mode: 1
   dutySetpoint: 0
-  velocitySetpoint: 0
-  positionSetpoint: 10
+  velocitySetpoint: 1
+  positionSetpoint: 90
   velocityPID:
-    Kp: 1
+    Kp: 3
     Ki: 0
     Kd: 0
     outputMin: -1
@@ -687,9 +682,9 @@ MonoBehaviour:
     integralMin: -1
     integralMax: 1
   positionPID:
-    Kp: 1
+    Kp: 3
     Ki: 0
-    Kd: 0
+    Kd: 0.2
     outputMin: -1
     outputMax: 1
     integralMin: -1
@@ -701,6 +696,26 @@ MonoBehaviour:
   rampRate: 5
   currentLimit: 100
   brakeMode: 0
+--- !u!114 &396327909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 396327901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee1cb46f36bf9e94a98eab8a280cb405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Encoder
+  countsPerRevolution: 2048
+  motor: {fileID: 396327902}
+  mountedOnMotorShaft: 1
+  gearRatio: 10
+  positionNoiseStdDev: 0
+  velocityNoiseStdDev: 0
+  motorAngle: 0
+  measurementDelay: 0
 --- !u!1 &410087039
 GameObject:
   m_ObjectHideFlags: 0

@@ -1,12 +1,13 @@
 using UnityEngine;
 
 [System.Serializable]
-public class Encoder
+public class Encoder : MonoBehaviour
 {
     [Header("Resolution")]
     public int countsPerRevolution = 2048;
 
     [Header("Mounting")]
+    public DCMotor motor;
     public bool mountedOnMotorShaft = true;
     public float gearRatio = 10f;   // Same as motor gear ratio
 
@@ -18,6 +19,8 @@ public class Encoder
     private float previousAngle;
     private float velocity;
     private bool firstUpdate = true;
+
+    public float motorAngle = 0f;
 
     // Optional latency simulation
     public float measurementDelay = 0f;
@@ -31,8 +34,12 @@ public class Encoder
         firstUpdate = true;
     }
 
-    public void Update(float motorAngle, float outputAngle, float dt)
+    public void FixedUpdate()
     {
+
+        float dt = Time.fixedDeltaTime;
+        motorAngle += motor.GetMotorSpeed() * dt;
+        float outputAngle = motorAngle/motor.gearRatio;
         float trueAngle = mountedOnMotorShaft ? motorAngle : outputAngle;
 
         // Add optional measurement delay (simple lag)
@@ -66,6 +73,11 @@ public class Encoder
     public float GetAngleRadians()
     {
         return (float)tickCount / countsPerRevolution * 2f * Mathf.PI;
+    }
+
+    public float GetRevolutions()
+    {
+        return (float)tickCount / countsPerRevolution;
     }
 
     public float GetVelocity() => velocity;

@@ -43,7 +43,7 @@ public class MotorController : MonoBehaviour
 
     void Awake()
     {
-        encoder = motor.getEncoder();
+        
         // Ensure PID objects exist
         if (velocityPID == null)
             velocityPID = new PIDController();
@@ -63,6 +63,7 @@ public class MotorController : MonoBehaviour
         float measuredPosition = encoder.GetAngleRadians();
         float measuredVelocity = encoder.GetVelocity();
         Debug.Log(measuredPosition);
+        Debug.Log(positionSetpoint);
         float targetDuty = 0f;
 
         switch (mode)
@@ -123,4 +124,7 @@ public class MotorController : MonoBehaviour
 
         previousVelocity = measuredVelocity;
     }
+    
+
+    
 }

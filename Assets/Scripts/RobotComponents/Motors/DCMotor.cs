@@ -1,3 +1,4 @@
+using System.Text;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody))]
@@ -31,8 +32,9 @@ public class DCMotor : MonoBehaviour
     private float current = 0f;
     private float motorSpeed = 0f;  // rad/s
 
-    private Encoder encoder = new Encoder();
     private float motorAngle = 0f;
+
+
 
 
     void FixedUpdate()
@@ -82,16 +84,15 @@ public class DCMotor : MonoBehaviour
         // Output angle after gearbox
         float outputAngle = motorAngle / gearRatio;
 
-        encoder.Update(motorAngle, outputAngle, dt);
+
 
     }
 
     // Optional getters for telemetry
     public float GetCurrent() => current;
     public float GetMotorSpeed() => motorSpeed;
-    public float getMotorAngle() => encoder.GetAngleRadians();
 
-    public Encoder getEncoder() => encoder;
+    
 
 
     private float deadZoneSign(float deadZone, float output)
